@@ -1,9 +1,228 @@
-Solid principles:
+1. Single Responsibility Principle (SRP)
+📌 Each class should have only one reason to change.
 
-1 . S => singleton class
-a class should have single instane of it and whenever it invoke that class the active instance should be returned
-this is useful in case of database connection, managing sockets  , axios interceptor
-( learn more about axios interceptor)
+class UserService {
+  getUser(id: string) {
+    // Fetch user from DB
+  }
 
-2. a class should be open more extension and close for modification
-a class once made should never get modified it should only be open for extension properties in base class should never change
+  sendEmail(email: string, message: string) {
+    // Sends email (should not be here)
+  }
+}
+✅ Good Example: (Separate Concerns)
+
+class UserService {
+  getUser(id: string) {
+    // Fetch user from DB
+  }
+}
+
+class EmailService {
+  sendEmail(email: string, message: string) {
+    // Sends email
+  }
+}
+
+
+
+2. Open/Closed Principle (OCP)
+📌 Open for extension but closed for modification.
+
+🔴 Bad Example: (Modifying existing class)
+class PaymentService {
+  processPayment(type: string) {
+    if (type === "creditCard") {
+      console.log("Processing credit card payment...");
+    } else if (type === "paypal") {
+      console.log("Processing PayPal payment...");
+    }
+  }
+}
+✅ Good Example: (Use abstraction to extend without modifying)
+interface PaymentMethod {
+  pay(): void;
+}
+
+class CreditCardPayment implements PaymentMethod {
+  pay() {
+    console.log("Processing credit card payment...");
+  }
+}
+
+class PayPalPayment implements PaymentMethod {
+  pay() {
+    console.log("Processing PayPal payment...");
+  }
+}
+
+class PaymentService {
+  processPayment(payment: PaymentMethod) {
+    payment.pay();
+  }
+}
+
+// Usage:
+const paymentService = new PaymentService();
+paymentService.processPayment(new PayPalPayment());
+
+
+3. Liskov Substitution Principle (LSP)
+📌 A subclass should be replaceable for its parent class without breaking the code.
+
+🔴 Bad Example: (Penguin cannot fly but still inherits fly())
+class Bird {
+  fly() {
+    console.log("Flying...");
+  }
+}
+
+class Penguin extends Bird {
+  fly() {
+    throw new Error("Penguins cannot fly!");
+  }
+}
+
+✅ Good Example: (Separate Flying and Non-Flying Birds)
+abstract class Bird {}
+
+interface CanFly {
+  fly(): void;
+}
+
+class Sparrow extends Bird implements CanFly {
+  fly() {
+    console.log("Flying...");
+  }
+}
+
+class Penguin extends Bird {
+  swim() {
+    console.log("Swimming...");
+  }
+}
+
+
+4. Interface Segregation Principle (ISP)
+📌 A class should not be forced to implement interfaces it does not use.
+
+🔴 Bad Example: (Unnecessary methods for Robots)
+interface Worker {
+  work(): void;
+  eat(): void;
+}
+
+class HumanWorker implements Worker {
+  work() {
+    console.log("Working...");
+  }
+
+  eat() {
+    console.log("Eating...");
+  }
+}
+
+class RobotWorker implements Worker {
+  work() {
+    console.log("Working...");
+  }
+
+  eat() {
+    throw new Error("Robots don’t eat!"); // Violates ISP
+  }
+}
+
+✅ Good Example: (Separate interfaces)
+interface Workable {
+  work(): void;
+}
+
+interface Eatable {
+  eat(): void;
+}
+
+class Human implements Workable, Eatable {
+  work() {
+    console.log("Working...");
+  }
+
+  eat() {
+    console.log("Eating...");
+  }
+}
+
+class Robot implements Workable {
+  work() {
+    console.log("Working...");
+  }
+}
+
+
+5. Dependency Inversion Principle (DIP)
+📌 High-level modules should depend on abstractions, not low-level modules.
+
+🔴 Bad Example: (Tightly coupled dependency)
+class MySQLDatabase {
+  query(sql: string) {
+    console.log(`Executing SQL: ${sql}`);
+  }
+}
+
+class UserService {
+  private db = new MySQLDatabase(); // Hardcoded dependency
+
+  getUser(id: string) {
+    this.db.query(`SELECT * FROM users WHERE id=${id}`);
+  }
+}
+
+
+✅ Good Example: (Use an abstraction)
+interface Database {
+  query(sql: string): void;
+}
+
+class MySQLDatabase implements Database {
+  query(sql: string) {
+    console.log(`Executing SQL: ${sql}`);
+  }
+}
+
+class PostgreSQLDatabase implements Database {
+  query(sql: string) {
+    console.log(`Executing PostgreSQL Query: ${sql}`);
+  }
+}
+
+class UserService {
+  constructor(private db: Database) {}
+
+  getUser(id: string) {
+    this.db.query(`SELECT * FROM users WHERE id=${id}`);
+  }
+}
+
+// Usage:
+const db = new MySQLDatabase();
+const userService = new UserService(db);
+userService.getUser("123");
+
+
+
+
+Summary:
+Principle	Key Idea	Example Solution
+SRP	One responsibility per class	Separate UserService and EmailService
+OCP	Extend without modifying existing code	Use interfaces instead of modifying a class
+LSP	Subtypes should be replaceable for base types	Use FlyingBird and NonFlyingBird
+ISP	Don't force classes to implement unused methods	Separate Workable and Eatable interfaces
+DIP	Depend on abstractions, not concrete classes	Use Database interface instead of MySQLDatabase
+
+
+
+
+Why Use SOLID in Node.js?
+✅ Easier to maintain
+✅ Less code duplication
+✅ Improved scalability
+✅ Easier to test (dependency injection)
