@@ -1,0 +1,9 @@
+Solid principles:
+
+1 . S => singleton class
+a class should have single instane of it and whenever it invoke that class the active instance should be returned
+this is useful in case of database connection, managing sockets  , axios interceptor
+( learn more about axios interceptor)
+
+2. a class should be open more extension and close for modification
+a class once made should never get modified it should only be open for extension properties in base class should never change
